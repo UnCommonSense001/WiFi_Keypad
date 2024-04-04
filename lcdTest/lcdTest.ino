@@ -18,6 +18,14 @@ void setup()
   lcd.print("Reminder to fix");
   lcd.setCursor(1, 1); // x, y
   lcd.print("the contrast!");
+
+  // count up!
+  for(int i=0; i<=999; i++)
+  {
+    lcd.clear();
+    lcd.print(i);
+    delay(50);
+  }
 }
 
 
