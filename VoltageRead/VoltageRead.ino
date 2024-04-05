@@ -2,7 +2,15 @@ using namespace std;
 
 #define voltageReadPin A0
 
-// bool buttonFlag = false;
+/* PINOUT
+looking at my button matrix with pins on the left
+D1
+D6
+D2
+D0
+Then rest of pins to breadboard (for voltage ladder)
+*/
+
 bool colFlags[] = {false, false, false, false};
 int columnPins[] = {16, 4, 12, 5};
 String matrix[4][4] = {

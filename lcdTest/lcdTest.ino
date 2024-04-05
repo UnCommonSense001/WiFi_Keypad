@@ -13,7 +13,7 @@ void setup()
   lcd.init(); // initialize the lcd
   // Print a message to the LCD.
   lcd.backlight();
-  delay(5000);
+  delay(1000);
   lcd.setCursor(0,0);
   lcd.print("Reminder to fix");
   lcd.setCursor(1, 1); // x, y
