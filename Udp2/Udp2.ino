@@ -26,14 +26,14 @@ using namespace std;
 // #define STAPSK "wemosD1Mini"
 // #endif
 
-const int buttonPin = 16;
-int buttonState = 0; // D0
+const int buttonPin = 16; // D0
+int buttonState = 0;
 bool buttonFlag = false;
 
 const int ledPin = 5; // D1, 220ohm resistor
 
-const char* ssid = STASSID;
-const char* password = STAPSK;
+const char* ssid = SSID;
+const char* password = PSK;
 
 IPAddress apIP(192, 168, 1, 1);
 IPAddress myIP(192, 168, 1, 3);
