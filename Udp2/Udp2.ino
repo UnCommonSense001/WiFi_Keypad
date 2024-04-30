@@ -1,16 +1,13 @@
+//8:45PM udp2 (doesn't work)
 /*
   UDPSendReceive.pde:
   This sketch receives UDP message strings, prints them to the serial port
   and sends an "acknowledge" string back to the sender
-
   A Processing sketch is included at the end of file that can be used to send
   and received messages for testing with a computer.
-
   created 21 Aug 2010
   by Michael Margolis
-
   This code is in the public domain.
-
   adapted from Ethernet library examples
 */
 using namespace std;
@@ -21,23 +18,18 @@ using namespace std;
 #include <iostream>
 #include <WiFiCredentials.h>
 
-// #ifndef STASSID
-// #define STASSID "wemosD1Mini"
-// #define STAPSK "wemosD1Mini"
-// #endif
-
-const int buttonPin = 16; // D0
-int buttonState = 0;
+const int buttonPin = 16;
+int buttonState = 0;  // D0
 bool buttonFlag = false;
 
-const int ledPin = 5; // D1, 220ohm resistor
+const int ledPin = 5;  // D1, 220ohm resistor
 
 const char* ssid = SSID;
 const char* password = PSK;
 
 IPAddress apIP(192, 168, 1, 1);
 IPAddress myIP(192, 168, 1, 3);
-IPAddress wemiAIP(192, 168, 1, 2);
+IPAddress wemiBIP(192, 168, 1, 2);
 
 #define MILLIS_TO_SEC 1000
 
@@ -56,7 +48,7 @@ char pressed[] = "pressed\r\n";
 char released[] = "released\r\n";
 
 WiFiUDP Udp;
-  
+
 void sendPacket(const char* addresss, string msg) {
   Udp.beginPacket(addresss, 8888);
   Udp.write(msg.c_str(), msg.size());
@@ -82,20 +74,16 @@ void setup() {
   pinMode(ledPin, OUTPUT);
 }
 
-// unsigned long startTime = millis();
-
 void loop() {
   buttonState = digitalRead(buttonPin);
-  if(buttonState == HIGH && !buttonFlag)
-  {
+  if (buttonState == HIGH && !buttonFlag) {
+    Serial.println("PRESSED");
     sendPacket(destination_IP, "pressed\r\n");
     buttonFlag = true;
-  } else {
-    if(buttonState == LOW && buttonFlag)
-    {
-      sendPacket(destination_IP, "released\r\n");
-      buttonFlag = false;
-    }
+  } else if (buttonState == LOW && buttonFlag) {
+    Serial.println("RELEASED");
+    sendPacket(destination_IP, "released\r\n");
+    buttonFlag = false;
   }
 
   // if there's data available, read a packet
@@ -104,28 +92,23 @@ void loop() {
     // read the packet into packetBufffer
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     packetBuffer[n] = 0;
-    // Serial.println("Contents:");
-    // Serial.println(packetBuffer);
+    bool respond = true;
 
-    if(memcmp(&ack, &packetBuffer, sizeof(ack)/sizeof(char)) == 0)
-    {
+    if (memcmp(&ack, &packetBuffer, sizeof(ack) / sizeof(char)) == 0) {
       Serial.println("MEMCMP ACK");
+      respond = false;
+    } else if (memcmp(&pressed, &packetBuffer, sizeof(pressed) / sizeof(char)) == 0) {
+      Serial.println("LED ON");
+      digitalWrite(ledPin, HIGH);        
+    } else if (memcmp(&released, &packetBuffer, sizeof(released) / sizeof(char)) == 0) {
+      Serial.println("LED OFF");
+      digitalWrite(ledPin, LOW);
     } else {
-      if(memcmp(&pressed, &packetBuffer, sizeof(pressed)/sizeof(char)) == 0)
-      {
-        Serial.println("LED ON");
-        digitalWrite(ledPin, HIGH);
-      } else {
-        if(memcmp(&released, & packetBuffer, sizeof(released)/sizeof(char)) == 0)
-        {
-          Serial.println("LED OFF");
-          digitalWrite(ledPin, LOW);
-        } else {
-          Serial.printf("Received packet of size %d from %s:%d\n    (to %s:%d, free heap = %d B)\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort(), Udp.destinationIP().toString().c_str(), Udp.localPort(), ESP.getFreeHeap());
-          Serial.println("Contents:");
-          Serial.println(packetBuffer);
-        }
-      }
+      Serial.printf("Received packet of size %d from %s:%d\n    (to %s:%d, free heap = %d B)\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort(), Udp.destinationIP().toString().c_str(), Udp.localPort(), ESP.getFreeHeap());
+      Serial.println("Contents:");
+      Serial.println(packetBuffer);
+    }
+    if(respond) {
       Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
       Udp.write(ReplyBuffer);
       Udp.endPacket();
