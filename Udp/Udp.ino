@@ -57,15 +57,17 @@ bool colFlags[] = {false, false, false, false};
 int columnPins[] = {16, 4, 12, 5}; // actual pins
 // int columnPins[] = {D0, D2, D6, D1}; // attempt at converting (NOT TESTED)
 
-/* === WRONG ON PURPOSE FOR TESTING === */
-// int columnPins[] = {16, 16, 16, 16}; // dummy for test
-/* ==================================== */
-
 char row0[4] = { '1', '2', '3', 'A' };
 char row1[4] = {'4', '5', '6', 'B' };
 char row2[4] = {'7', '8', '9', 'C' };
 char row3[4] = {'*', '0', '#', 'D' };
 char* matrix[4] = {row0, row1, row2, row3};
+
+void sendPacket(const char* addresss, char msg) {
+  Udp.beginPacket(addresss, 8888);
+  Udp.write(msg);
+  Udp.endPacket();
+}
 
 void sendPacket(const char* addresss, string msg) {
   Udp.beginPacket(addresss, 8888);
@@ -128,13 +130,17 @@ void setup() {
   delay(3000);
   Serial.println("sending startup 1!");
   sendPacket(destination_IP, "startup 1!\r\n");
-  delay(1000);
+  delay(250);
   Serial.println("sending startup 2!!");
   sendPacket(destination_IP, "startup 2!!\r\n");
-  delay(1000);
+  delay(250);
   Serial.println("sending startup 3!!!");
   sendPacket(destination_IP, "startup 3!!!\r\n");
-  Serial.println("ALL 3 STARTUPS SENT");
+  delay(250);
+  Serial.println("sending startup 4!!!!");
+  sendPacket(destination_IP, "startup 4!!!!\r\n");
+  Serial.println("ALL 4 STARTUPS SENT");
+  delay(250);
 }
 
 unsigned long startTime = millis();
@@ -142,17 +148,35 @@ unsigned long startTime = millis();
 void loop() {
   unsigned long curTime = millis();
 
+  /* === THE FOLLOWING TESTS WERE WITH HARDWARE CONNECTED TO THE WEMOS === */
   // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - char curVal = readMatrix(); // this causes WiFi to disconnect
   // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - readCol(columnPins[0]); // and this too
   // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - analogRead(voltageReadPin);
-  digitalWrite(columnPins[0], LOW); // OK
+  // digitalWrite(columnPins[0], LOW); // OK
   // digitalWrite(columnPins[0], HIGH); // OK
+  /* ===================================================================== */
 
-  if(curTime - startTime >= 1 * MILLIS_TO_SEC)
+  /* === THE FOLLOWING TESTS WERE WITHOUT ANY HARDWARE CONNECTED TO THE WEMOS === */
+  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - char curVal = readMatrix();
+  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - readCol(columnPins[0]);
+  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - analogRead(voltageReadPin);
+  // digitalWrite(columnPins[0], LOW); // OK
+  // digitalWrite(columnPins[0], HIGH); // OK
+  // digitalRead(columnPins[0]); // OK
+
+  char curVal = readMatrix();
+  if(curVal != '\0')
   {
-    sendPacket(destination_IP, "hello!!!\r\n");
-    startTime = curTime;
+    Serial.println(curVal);
+    sendPacket(destination_IP, curVal);
+    delay(250);
   }
+
+  // if(curTime - startTime >= 1 * MILLIS_TO_SEC)
+  // {
+  //   sendPacket(destination_IP, "hello!!!\r\n");
+  //   startTime = curTime;
+  // }
 
   // char curVal = readMatrix();
   // if (!curVal == '\0')
