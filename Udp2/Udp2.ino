@@ -118,7 +118,7 @@ void loop() {
       lcd.clear();
       x = 0;
       y = 0;
-    } else { // CHANGE so makes the x and y in range FIRST then displays (clear if necessary (if off screen on second line))
+    } else {
       Serial.println(packetBuffer);
       if(x > 15 && y == 0)
       {
