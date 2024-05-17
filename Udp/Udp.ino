@@ -128,42 +128,26 @@ void setup() {
     digitalWrite(colPin, HIGH);
   }
 
-  delay(3000);
-  Serial.println("sending startup 1!");
-  sendPacket(destination_IP, "startup 1!");
-  delay(250);
-  Serial.println("sending startup 2!!");
-  sendPacket(destination_IP, "startup 2!!");
-  delay(250);
-  Serial.println("sending startup 3!!!");
-  sendPacket(destination_IP, "startup 3!!!");
-  delay(250);
-  Serial.println("sending startup 4!!!!");
-  sendPacket(destination_IP, "startup 4!!!!");
-  Serial.println("ALL 4 STARTUPS SENT");
-  delay(250);
+  // delay(3000);
+  // Serial.println("sending startup 1!");
+  // sendPacket(destination_IP, "startup 1!");
+  // delay(250);
+  // Serial.println("sending startup 2!!");
+  // sendPacket(destination_IP, "startup 2!!");
+  // delay(250);
+  // Serial.println("sending startup 3!!!");
+  // sendPacket(destination_IP, "startup 3!!!");
+  // delay(250);
+  // Serial.println("sending startup 4!!!!");
+  // sendPacket(destination_IP, "startup 4!!!!");
+  // Serial.println("ALL 4 STARTUPS SENT");
+  // delay(250);
 }
 
 unsigned long startTime = millis();
 
 void loop() {
   unsigned long curTime = millis();
-
-  /* === THE FOLLOWING TESTS WERE WITH HARDWARE CONNECTED TO THE WEMOS === */
-  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - char curVal = readMatrix(); // this causes WiFi to disconnect
-  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - readCol(columnPins[0]); // and this too
-  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - analogRead(voltageReadPin);
-  // digitalWrite(columnPins[0], LOW); // OK
-  // digitalWrite(columnPins[0], HIGH); // OK
-  /* ===================================================================== */
-
-  /* === THE FOLLOWING TESTS WERE WITHOUT ANY HARDWARE CONNECTED TO THE WEMOS === */
-  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - char curVal = readMatrix();
-  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - readCol(columnPins[0]);
-  // WARNING: CAUSES WiFi DISCONNECTION AFTER FIRST TWO TESTS IN SETUP - analogRead(voltageReadPin);
-  // digitalWrite(columnPins[0], LOW); // OK
-  // digitalWrite(columnPins[0], HIGH); // OK
-  // digitalRead(columnPins[0]); // OK
 
   char curVal = readMatrix();
   if(curVal != '\0')
@@ -172,72 +156,7 @@ void loop() {
     sendPacket(destination_IP, curVal);
     delay(250);
   }
-
-  // if(curTime - startTime >= 1 * MILLIS_TO_SEC)
-  // {
-  //   sendPacket(destination_IP, "hello!!!\r\n");
-  //   startTime = curTime;
-  // }
-
-  // char curVal = readMatrix();
-  // if (!curVal == '\0')
-  // {
-  //   Serial.println(curVal);
-  //   sendPacket(destination_IP, "hello!!!\r\n");
-  // }
 }
-
-// unsigned long startTime = millis();
-
-// void loop() {
-//   unsigned long curTime = millis();
-
-//   if(curTime - startTime >= 1 * MILLIS_TO_SEC)
-//   {
-//     Serial.println("sending message");
-//     sendPacket(destination_IP, "message\r\n");
-//     startTime = curTime;
-//   }
-  // buttonState = digitalRead(buttonPin);
-  // if (buttonState == HIGH && !buttonFlag) {
-  //   Serial.println("PRESSED");
-  //   sendPacket(destination_IP, "pressed\r\n");
-  //   buttonFlag = true;
-  // } else if (buttonState == LOW && buttonFlag) {
-  //   Serial.println("RELEASED");
-  //   sendPacket(destination_IP, "released\r\n");
-  //   buttonFlag = false;
-  // }
-
-  // if there's data available, read a packet
-  // int packetSize = Udp.parsePacket();
-  // if (packetSize) {
-  //   // read the packet into packetBufffer
-  //   int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
-  //   packetBuffer[n] = 0;
-  //   bool respond = true;
-
-  //   if (memcmp(&ack, &packetBuffer, sizeof(ack) / sizeof(char)) == 0) {
-  //     Serial.println("MEMCMP ACK");
-  //     respond = false;
-  //   } else if (memcmp(&pressed, &packetBuffer, sizeof(pressed) / sizeof(char)) == 0) {
-  //     Serial.println("LED ON");
-  //     digitalWrite(ledPin, HIGH);        
-  //   } else if (memcmp(&released, &packetBuffer, sizeof(released) / sizeof(char)) == 0) {
-  //     Serial.println("LED OFF");
-  //     digitalWrite(ledPin, LOW);
-  //   } else {
-  //     Serial.printf("Received packet of size %d from %s:%d\n    (to %s:%d, free heap = %d B)\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort(), Udp.destinationIP().toString().c_str(), Udp.localPort(), ESP.getFreeHeap());
-  //     Serial.println("Contents:");
-  //     Serial.println(packetBuffer);
-  //   }
-  //   if(respond) {
-  //     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-  //     Udp.write(ReplyBuffer);
-  //     Udp.endPacket();
-  //   }
-  // }
-// }
 
 /*
   test (shell/netcat):

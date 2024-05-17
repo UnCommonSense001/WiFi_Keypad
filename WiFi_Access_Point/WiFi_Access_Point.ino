@@ -41,30 +41,30 @@
 // #endif
 
 /* Set these to your desired credentials. */
-const char *ssid = APSSID;
-const char *password = APPSK;
+const char *ssid = SSID;
+const char *password = PSK;
 
 // const String hostname = "wemi-server";
 
 IPAddress apIP(192, 168, 1, 1);
 
-ESP8266WebServer server(80);
+// ESP8266WebServer server(80);
 IPAddress myIP;
 
 /* Just a little test message.  Go to http://192.168.1.1 in a web browser
    connected to this access point to see it.
 */
-void handleRoot() {
-  server.send(200, "text/html", "<h1>You are connected</h1>");
-}
+// void handleRoot() {
+//   server.send(200, "text/html", "<h1>You are connected</h1>");
+// }
 
-void handleDepressed() {
-  server.send(200, "text/html", "Button Depressed");
-}
+// void handleDepressed() {
+//   server.send(200, "text/html", "Button Depressed");
+// }
 
-void handleReleased() {
-  server.send(200, "text/html", "Button Released");
-}
+// void handleReleased() {
+//   server.send(200, "text/html", "Button Released");
+// }
 
 void setup() {
   delay(1000);
@@ -81,15 +81,22 @@ void setup() {
 
   Serial.print("AP IP address: ");
   Serial.println(myIP);
-  server.on("/", handleRoot);
-  server.on("/depressed", handleDepressed);
-  server.on("/released", handleReleased);
-  server.begin();
-  Serial.println("HTTP server started");
+  // server.on("/", handleRoot);
+  // server.on("/depressed", handleDepressed);
+  // server.on("/released", handleReleased);
+  // server.begin();
+  // Serial.println("HTTP server started");
 }
 
+unsigned long startTime = millis();
+unsigned long curTime;
+
 void loop() {
-  server.handleClient();
-  Serial.print("I am the AP! AP IP address: ");
-  Serial.println(myIP);
+  // server.handleClient();
+  curTime = millis();
+  if(curTime - startTime >= 1000){
+    Serial.print("I am the AP! AP IP address: ");
+    Serial.println(myIP);
+    startTime = curTime;
+  }
 }

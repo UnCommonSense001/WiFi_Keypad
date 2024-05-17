@@ -27,9 +27,9 @@ using namespace std;
 #include <WiFiUdp.h>
 #include <string.h>
 #include <iostream>
-#include <WiFiCredentials.h>
-
 #include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+#include <WiFiCredentials.h>
 
 const char* ssid = SSID;
 const char* password = PSK;
@@ -58,10 +58,27 @@ WiFiUDP Udp;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
 
+Servo myServo;
+
+int servoPos = 0;
+
+int x = 0;
+int y = 0;
+
 void sendPacket(const char* addresss, string msg) {
   Udp.beginPacket(addresss, 8888);
   Udp.write(msg.c_str(), msg.size());
   Udp.endPacket();
+}
+
+void changePosition(int num, bool wrap = false) {
+  servoPos += num;
+  if((servoPos > 180 && !wrap) || (servoPos < 0 && wrap)) {
+    servoPos = 180;
+  }
+  if((servoPos < 0 && !wrap) || (servoPos > 180 && wrap)) {
+    servoPos = 0;
+  }
 }
 
 void setup() {
@@ -85,34 +102,34 @@ void setup() {
   Serial.println(WiFi.localIP());
   Serial.printf("UDP server on port %d\n", localPort);
   Udp.begin(localPort);
+
+  myServo.attach(D4);
+  myServo.write(0);
+  // Serial.println("Servo attached on D4");
 }
 
-// unsigned long startTime = millis();
-
-int x = 0;
-int y = 0;
-
 void loop() {
-  // buttonState = digitalRead(buttonPin);
-  // if(buttonState == HIGH && !buttonFlag)
-  // {
-  //   sendPacket(destination_IP, "pressed\r\n");
-  //   buttonFlag = true;
-  // } else {
-  //   if(buttonState == LOW && buttonFlag)
-  //   {
-  //     sendPacket(destination_IP, "released\r\n");
-  //     buttonFlag = false;
-  //   }
-  // }
-
   // if there's data available, read a packet
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     // read the packet into packetBufffer
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     packetBuffer[n] = 0;
-    if(n == 1 && packetBuffer[0] == '!')
+    if(n == 1 && packetBuffer[0] == 'A')
+    {
+      // myServo.write(90);
+      changePosition(20, false);
+      myServo.write(servoPos);
+
+    }
+    else if(n == 1 && packetBuffer[0] == 'B')
+    {
+      // myServo.write(180);
+      changePosition(-20, false);
+      myServo.write(servoPos);
+
+    }
+    else if(n == 1 && packetBuffer[0] == '!')
     {
       Serial.println("CLEAR");
       lcd.clear();
