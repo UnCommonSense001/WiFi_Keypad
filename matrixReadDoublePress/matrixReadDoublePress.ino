@@ -26,7 +26,7 @@ using namespace std;
 
 #define voltageReadPin A0
 
-#define MILLIS_TO_SEC 100
+// #define MILLIS_TO_SEC 100
 #define COOLDOWN_MILLIS 2000
 
 bool colFlags[] = {false, false, false, false};
@@ -35,12 +35,9 @@ int columnPins[] = {16, 4, 12, 5}; // actual pins
 
 int baseNum = 65; // ASCII "A"
 
-// char row0[4] = {'1', '2', '3', 'A'};
-// char row1[4] = {'4', '5', '6', 'B'};
-// char row2[4] = {'7', '8', '9', 'C'};
-// // char row3[4] = {'*', '0', '#', 'D' };
-// char row3[4] = {'*', '0', '#', '!'};
-// char* matrix[4] = {row0, row1, row2, row3};
+unsigned long lastButtonTime = millis();
+int lastButton[2] = {-1, -1};
+char msgToSend[40];
 
 int readCol(int colPin) {
   digitalWrite(colPin, LOW);
@@ -66,27 +63,28 @@ char readMatrix(int last[2], unsigned long &lTime) {
     if (row != -1 && !colFlags[col]) {
       colFlags[col] = true;
       Serial.println(millis() - lTime);
-      int toReturn = -1;
-      if(millis() - lTime <= COOLDOWN_MILLIS && last[0] == col && last[1] == row) {
-        toReturn = baseNum + (row * 8) + 1 + (col * 2);
+      if(millis() - lTime <= COOLDOWN_MILLISs && last[0] == col && last[1] == row && baseNum + (row * 8) + 1 + (col * 2) <= 90) {
+        char toReturn = (baseNum + (row * 8) + 1 + (col * 2));
+        Serial.print("--: ");
+        Serial.println(toReturn);
+        strcat(msgToSend, &toReturn);
       }
+      // if(toReturn != -1) {
+        // char charToReturn = char(toReturn);
+        // Serial.println(charToReturn);
+        // strcat(msgToSend, &charToReturn);
+      // }
       lTime = millis();
       last[0] = col;
       last[1] = row;
-      if(toReturn != -1) {
-        return toReturn;
-      }
       if ((baseNum + (row * 8) + (col * 2)) <= 90) {
-        return (baseNum + (row * 8) + (col * 2));
+        // return (baseNum + (row * 8) + (col * 2));
+        char charToReturn = char(baseNum + (row * 8) + (col * 2));
+        Serial.println(charToReturn);
+        strcat(msgToSend, &charToReturn);
       } else {
         return 0;
       }
-      // if(millis() - lTime >= COOLDOWN_MILLIS) {
-      //   return (baseNum + (row * 8) + (col * 2));
-      // } else {
-      //   lTime = millis();
-      //   return (baseNum + (row * 8) + 1 + (col * 2));
-      // }
     }
     if (row == -1 && colFlags[col])
       colFlags[col] = false;
@@ -96,6 +94,7 @@ char readMatrix(int last[2], unsigned long &lTime) {
 
 void setup() {
   Serial.begin(115200);
+  // strcpy(msgToSend, &coolChar); // dest, src
   pinMode(voltageReadPin, INPUT);
   for (int colPin : columnPins) {
     pinMode(colPin, OUTPUT);
@@ -103,42 +102,14 @@ void setup() {
   }
 }
 
-unsigned long lastButtonTime = millis();
-int lastButton[2] = {-1, -1};
-
 void loop() {
   char curVal = readMatrix(lastButton, lastButtonTime);
-  if(curVal != '\0')
-  {
-    Serial.println(curVal);
-    delay(100);
-  }
+  // Serial.println(msgToSend);
+  delay(100);
+  // if(curVal != '\0')
+  // {
+  //   Serial.println(curVal);
+  //   Serial.println(msgToSend);
+  //   delay(100);
+  // }
 }
-
-// int num = 0;
-// int coolThing[2] = {-1, -1};
-
-// void weirdFunc(int list[2], int &nm) {
-//   list[0] = 5;
-//   list[1] = 2;
-//   nm = 234;
-// }
-
-// void setup() {
-//   Serial.begin(115200);
-//   delay(1000);
-//   Serial.println("Hello!");
-//   Serial.println(num);
-//   num = 2;
-//   weirdFunc(coolThing, num);
-// }
-
-// void loop() {
-//   Serial.print("0: ");
-//   Serial.println(coolThing[0]);
-//   Serial.print("1: ");
-//   Serial.println(coolThing[1]);
-//   Serial.print("num: ");
-//   Serial.println(num);
-//   delay(1000);
-// }
