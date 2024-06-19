@@ -25,9 +25,7 @@ using namespace std;
 #include <iostream>
 
 #define voltageReadPin A0
-
-// #define MILLIS_TO_SEC 100
-#define COOLDOWN_MILLIS 2000
+#define TIMEOUT 1500
 
 bool colFlags[] = {false, false, false, false};
 int columnPins[] = {16, 4, 12, 5}; // actual pins
@@ -118,8 +116,14 @@ void readMatrix(button_t &lButton) {
       char shiftedChar = unshiftedChar + 1;
       setButton(curButton, col, row, curTime, unshiftedChar);
 
-      if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= 1500) {
-        Serial.println(shiftedChar);
+      if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
+        Serial.println(char(lButton.character + 1));
+        clearButton(lButton);
+      } else if(isValid(lButton) && isValid(curButton)) {
+        Serial.println(lButton.character);
+        setButton(lButton, curButton);
+      } else if(isValid(lButton) && !isValid(curButton)) {
+        Serial.println(lButton.character);
         clearButton(lButton);
       } else {
         setButton(lButton, curButton);
@@ -144,9 +148,9 @@ void setup() {
 void loop() {
   readMatrix(lastButton);
   unsigned long curTime = millis();
-  if(isValid(lastButton) && curTime - lastButton.time >= 1500) {
+  if(isValid(lastButton) && curTime - lastButton.time >= TIMEOUT) {
     Serial.println(lastButton.character);
     clearButton(lastButton);
   }
-  delay(100);
+  delay(85);
 }
