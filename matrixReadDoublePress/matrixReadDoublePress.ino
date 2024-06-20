@@ -12,11 +12,31 @@ using namespace std;
 #include <string.h>
 #include <iostream>
 
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#include <WiFiCredentials.h>
+
 #define voltageReadPin A0
 #define TIMEOUT 1500
 
-// const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
-const int MAX_MESSAGE_SIZE = 10;
+const char* ssid = SSID;
+const char* password = PSK;
+
+IPAddress apIP(192, 168, 1, 1);
+IPAddress myIP(192, 168, 1, 2);
+IPAddress wemiBIP(192, 168, 1, 3);
+
+const char* hostname = "wemi-a";
+const char* destination_IP = "192.168.1.3";
+unsigned int localPort = 8888;
+
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
+// char ReplyBuffer[] = "acknowledged\r\n";
+
+WiFiUDP Udp;
+
+const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
+// const int MAX_MESSAGE_SIZE = 10; // for testing purposes
 
 bool colFlags[] = {false, false, false, false};
 const int columnPins[] = {16, 4, 12, 5}; // actual pins
@@ -35,6 +55,12 @@ struct button_t {
 button_t lastButton;
 string msgToSend = "";
 
+void sendPacket(const char* address, string msg) {
+  Udp.beginPacket(address, 8888);
+  Udp.write(msg.c_str(), msg.size());
+  Udp.endPacket();
+}
+
 void setButton(button_t &b, int bCol, int bRow, unsigned long &bTime, char bCharacter) {
   b.col = bCol;
   b.row = bRow;
@@ -48,13 +74,6 @@ void setButton(button_t &bDest, button_t &bOrigin) {
   bDest.time = bOrigin.time;
   bDest.character = bOrigin.character;
 }
-
-// bool compareRowsAndCols(button_t &b1, button_t &b2) {
-//   if(b1.col == b2.col && b1.row == b2.row) {
-//     return true;
-//   }
-//   return false;
-// }
 
 bool compareButtons(button_t &b1, button_t &b2) {
   if(b1.character == b2.character) {
@@ -107,7 +126,7 @@ void readMatrix(button_t &lButton) {
 
       // Serial.println((int)unshiftedChar);
 
-      if(msgToSend.length() < MAX_MESSAGE_SIZE) {
+      if(msgToSend.size() < MAX_MESSAGE_SIZE) {
         if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
           char newChar = lButton.character + 1;
           Serial.println(newChar);
@@ -130,8 +149,9 @@ void readMatrix(button_t &lButton) {
         if(curButton.character == 95) {
           // "SEND"
           clearButton(curButton);
-          Serial.println("SENDING - if that code had been written/integrated yet :(");
-          // call some send function
+          Serial.println("SENDING over WiFi (UDP!");
+          sendPacket(destination_IP, msgToSend);
+          delay(250);
           msgToSend = "";
         } else if(curButton.character == 93) {
           // "Clear"
@@ -153,7 +173,20 @@ void readMatrix(button_t &lButton) {
 
 void setup() {
   Serial.begin(115200);
-  // strcat(msgToSend, &coolChar); // dest, src
+  
+  WiFi.mode(WIFI_STA);
+  WiFi.setHostname(hostname);
+  WiFi.config(myIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(500);
+  }
+  Serial.print("Connected! IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.printf("UDP server on port %d\n", localPort);
+  Udp.begin(localPort);
+
   pinMode(voltageReadPin, INPUT);
   for (int colPin : columnPins) {
     pinMode(colPin, OUTPUT);
