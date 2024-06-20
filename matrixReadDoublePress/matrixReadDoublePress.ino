@@ -105,14 +105,9 @@ void readMatrix(button_t &lButton) {
       char shiftedChar = unshiftedChar + 1;
       setButton(curButton, col, row, curTime, unshiftedChar);
 
-      Serial.println((int)unshiftedChar);
+      // Serial.println((int)unshiftedChar);
 
-      if(unshiftedChar == 95) {
-        msgToSend = msgToSend + lButton.character;
-        setButton(lButton, curButton);
-        Serial.println("SENDING - if that code had been written/integrated yet :(");
-      } else {
-        if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
+      if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
           char newChar = lButton.character + 1;
           Serial.println(newChar);
           msgToSend = msgToSend + newChar;
@@ -127,6 +122,23 @@ void readMatrix(button_t &lButton) {
           clearButton(lButton);
         } else {
           setButton(lButton, curButton);
+        }
+
+      if(!isValid(curButton)) {
+        if(curButton.character == 95) {
+          // "SEND"
+          clearButton(curButton);
+          Serial.println("SENDING - if that code had been written/integrated yet :(");
+          // call some send function
+          msgToSend = "";
+        } else if(curButton.character == 93) {
+          // "Clear"
+          msgToSend = "";
+        } else if(curButton.character == 91) {
+          // "Backspace"
+          if (!msgToSend.empty()) {
+            msgToSend.pop_back();
+          }
         }
       }
     }
