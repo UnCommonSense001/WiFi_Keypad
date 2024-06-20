@@ -105,21 +105,29 @@ void readMatrix(button_t &lButton) {
       char shiftedChar = unshiftedChar + 1;
       setButton(curButton, col, row, curTime, unshiftedChar);
 
-      if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
-        char newChar = lButton.character + 1;
-        Serial.println(newChar);
-        msgToSend = msgToSend + newChar;
-        clearButton(lButton);
-      } else if(isValid(lButton) && isValid(curButton)) {
-        Serial.println(lButton.character);
+      Serial.println((int)unshiftedChar);
+
+      if(unshiftedChar == 95) {
         msgToSend = msgToSend + lButton.character;
         setButton(lButton, curButton);
-      } else if(isValid(lButton) && !isValid(curButton)) {
-        Serial.println(lButton.character);
-        msgToSend = msgToSend + lButton.character;
-        clearButton(lButton);
+        Serial.println("SENDING - if that code had been written/integrated yet :(");
       } else {
-        setButton(lButton, curButton);
+        if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
+          char newChar = lButton.character + 1;
+          Serial.println(newChar);
+          msgToSend = msgToSend + newChar;
+          clearButton(lButton);
+        } else if(isValid(lButton) && isValid(curButton)) {
+          Serial.println(lButton.character);
+          msgToSend = msgToSend + lButton.character;
+          setButton(lButton, curButton);
+        } else if(isValid(lButton) && !isValid(curButton)) {
+          Serial.println(lButton.character);
+          msgToSend = msgToSend + lButton.character;
+          clearButton(lButton);
+        } else {
+          setButton(lButton, curButton);
+        }
       }
     }
     if (row == -1 && colFlags[col])
