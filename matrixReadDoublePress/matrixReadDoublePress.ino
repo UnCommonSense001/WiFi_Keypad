@@ -15,14 +15,16 @@ using namespace std;
 #define voltageReadPin A0
 #define TIMEOUT 1500
 
+// const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
+const int MAX_MESSAGE_SIZE = 10;
+
 bool colFlags[] = {false, false, false, false};
-int columnPins[] = {16, 4, 12, 5}; // actual pins
+const int columnPins[] = {16, 4, 12, 5}; // actual pins
 // int columnPins[] = {D0, D2, D6, D1}; // attempt at converting (NOT TESTED)
 
-int baseNum = 65; // ASCII "A"
-int maxNum = 90; // ASCII "Z"
+const int baseNum = 65; // ASCII "A"
+const int maxNum = 90; // ASCII "Z"
 
-//WITH TIME 
 struct button_t {
   int col;
   int row;
@@ -31,8 +33,6 @@ struct button_t {
 };
 
 button_t lastButton;
-
-// char msgToSend[40] = "";
 string msgToSend = "";
 
 void setButton(button_t &b, int bCol, int bRow, unsigned long &bTime, char bCharacter) {
@@ -107,7 +107,8 @@ void readMatrix(button_t &lButton) {
 
       // Serial.println((int)unshiftedChar);
 
-      if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
+      if(msgToSend.length() < MAX_MESSAGE_SIZE) {
+        if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
           char newChar = lButton.character + 1;
           Serial.println(newChar);
           msgToSend = msgToSend + newChar;
@@ -123,6 +124,7 @@ void readMatrix(button_t &lButton) {
         } else {
           setButton(lButton, curButton);
         }
+      }
 
       if(!isValid(curButton)) {
         if(curButton.character == 95) {
@@ -142,6 +144,7 @@ void readMatrix(button_t &lButton) {
         }
       }
     }
+
     if (row == -1 && colFlags[col])
       colFlags[col] = false;
   }
