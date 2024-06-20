@@ -1,15 +1,3 @@
-/*
-  UDPSendReceive.pde:
-  This sketch receives UDP message strings, prints them to the serial port
-  and sends an "acknowledge" string back to the sender
-  A Processing sketch is included at the end of file that can be used to send
-  and received messages for testing with a computer.
-  created 21 Aug 2010
-  by Michael Margolis
-  This code is in the public domain.
-  adapted from Ethernet library examples
-*/
-
 /* PINOUT
 looking at my button matrix with pins on the left
 D1
@@ -44,7 +32,8 @@ struct button_t {
 
 button_t lastButton;
 
-char msgToSend[40];
+// char msgToSend[40] = "";
+string msgToSend = "";
 
 void setButton(button_t &b, int bCol, int bRow, unsigned long &bTime, char bCharacter) {
   b.col = bCol;
@@ -117,13 +106,17 @@ void readMatrix(button_t &lButton) {
       setButton(curButton, col, row, curTime, unshiftedChar);
 
       if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
-        Serial.println(char(lButton.character + 1));
+        char newChar = lButton.character + 1;
+        Serial.println(newChar);
+        msgToSend = msgToSend + newChar;
         clearButton(lButton);
       } else if(isValid(lButton) && isValid(curButton)) {
         Serial.println(lButton.character);
+        msgToSend = msgToSend + lButton.character;
         setButton(lButton, curButton);
       } else if(isValid(lButton) && !isValid(curButton)) {
         Serial.println(lButton.character);
+        msgToSend = msgToSend + lButton.character;
         clearButton(lButton);
       } else {
         setButton(lButton, curButton);
@@ -137,7 +130,7 @@ void readMatrix(button_t &lButton) {
 
 void setup() {
   Serial.begin(115200);
-  // strcpy(msgToSend, &coolChar); // dest, src
+  // strcat(msgToSend, &coolChar); // dest, src
   pinMode(voltageReadPin, INPUT);
   for (int colPin : columnPins) {
     pinMode(colPin, OUTPUT);
@@ -150,7 +143,10 @@ void loop() {
   unsigned long curTime = millis();
   if(isValid(lastButton) && curTime - lastButton.time >= TIMEOUT) {
     Serial.println(lastButton.character);
+    msgToSend = msgToSend + lastButton.character;
+    // strcat(msgToSend, &lastButton.character); // known working alone
     clearButton(lastButton);
   }
+  Serial.println(msgToSend.c_str());
   delay(85);
 }
