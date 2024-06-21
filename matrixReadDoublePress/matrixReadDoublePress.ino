@@ -19,6 +19,8 @@ using namespace std;
 #define voltageReadPin A0
 #define TIMEOUT 1500
 
+// #define ASCII_SPACE 32 // ASCII 32 is a space
+
 const char* ssid = SSID;
 const char* password = PSK;
 
@@ -122,26 +124,42 @@ void readMatrix(button_t &lButton) {
       button_t curButton;
       char unshiftedChar = baseNum + (row * 8) + (col * 2);
       char shiftedChar = unshiftedChar + 1;
+      // if(unshiftedChar == 93) {
+      //   unshiftedChar == ' ';
+      //   Serial.println("SPACE!!!!");
+      // }
       setButton(curButton, col, row, curTime, unshiftedChar);
 
       // Serial.println((int)unshiftedChar);
 
       if(msgToSend.size() < MAX_MESSAGE_SIZE) {
+        // if(curButton.character == 93) {
+        //   // Serial.println(" ");
+        //   msgToSend = msgToSend + ' ';
+        //   clearButton(curButton);
+        // }
         if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
           char newChar = lButton.character + 1;
-          Serial.println(newChar);
+          // Serial.println(newChar);
           msgToSend = msgToSend + newChar;
           clearButton(lButton);
         } else if(isValid(lButton) && isValid(curButton)) {
-          Serial.println(lButton.character);
+          // Serial.println(lButton.character);
           msgToSend = msgToSend + lButton.character;
           setButton(lButton, curButton);
-        } else if(isValid(lButton) && !isValid(curButton)) {
-          Serial.println(lButton.character);
+        // } else if(isValid(lButton) && !isValid(curButton)) {
+        } else if(isValid(lButton) && (!isValid(curButton) || curButton.character == 93)) {
+          // Serial.println(lButton.character);
           msgToSend = msgToSend + lButton.character;
+          // if(curButton.character == 93) {
+          //   msgToSend += ' ';
+          // }
           clearButton(lButton);
         } else {
           setButton(lButton, curButton);
+        }
+        if(curButton.character == 93) {
+        msgToSend += ' ';
         }
       }
 
@@ -153,10 +171,12 @@ void readMatrix(button_t &lButton) {
           sendPacket(destination_IP, msgToSend);
           delay(250);
           msgToSend = "";
-        } else if(curButton.character == 93) {
-          // "Clear"
-          msgToSend = "";
-        } else if(curButton.character == 91) {
+        }
+        /*else if(curButton.character == 93) {
+          // PREVIOUSLY - "Clear"
+          // msgToSend = "";
+        }*/
+        else if(curButton.character == 91) {
           // "Backspace"
           if (!msgToSend.empty()) {
             msgToSend.pop_back();
@@ -198,7 +218,7 @@ void loop() {
   readMatrix(lastButton);
   unsigned long curTime = millis();
   if(isValid(lastButton) && curTime - lastButton.time >= TIMEOUT) {
-    Serial.println(lastButton.character);
+    // Serial.println(lastButton.character);
     msgToSend = msgToSend + lastButton.character;
     // strcat(msgToSend, &lastButton.character); // known working alone
     clearButton(lastButton);
