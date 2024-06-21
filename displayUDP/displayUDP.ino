@@ -70,9 +70,11 @@ void loop() {
     // read the packet into packetBufffer
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     packetBuffer[n] = 0;
-    Serial.println(packetBuffer);
-    lcd.setCursor(0, 0);
     lcd.clear();
-    lcd.print(packetBuffer);
+    if(!(n == 1 && packetBuffer[0] == '+')) {
+      Serial.println(packetBuffer);
+      lcd.setCursor(0, 0);  
+      lcd.print(packetBuffer);
+    }
   }
 }

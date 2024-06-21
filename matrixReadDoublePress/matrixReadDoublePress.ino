@@ -168,7 +168,11 @@ void readMatrix(button_t &lButton) {
           // "SEND"
           clearButton(curButton);
           Serial.println("SENDING over WiFi (UDP!");
-          sendPacket(destination_IP, msgToSend);
+          if(msgToSend != "") {
+            sendPacket(destination_IP, msgToSend);
+          } else {
+            sendPacket(destination_IP, "+");
+          }
           delay(250);
           msgToSend = "";
         }
