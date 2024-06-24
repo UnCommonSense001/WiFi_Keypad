@@ -34,6 +34,29 @@ char packetBuffer[41]; // limit it so that it fits on the top 2 lines of the dis
 WiFiUDP Udp;
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
+
+void displayData(char* data) {
+  Serial.println("Displaying data...");
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  if(strlen(packetBuffer) <= 20) {
+    Serial.println(data);
+    lcd.print(data);
+  } else if(strlen(packetBuffer) <= 40) {
+    Serial.println("less than 40 chars - 2lines");
+    char firstLine[21];
+    strncpy(firstLine, data, 20);
+    firstLine[20] = 0;
+    Serial.println(firstLine);
+    lcd.print(firstLine);
+    strncpy(data, data + 20, 20);
+    data[20] = 0;
+    Serial.println(data);
+    lcd.setCursor(0, 1); // x, y
+    lcd.print(data);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -74,17 +97,9 @@ void loop() {
     lcd.clear();
     if(!(n == 1 && packetBuffer[0] == '+')) {
       Serial.println(packetBuffer);
-      lcd.setCursor(0, 0);
-      lcd.print(packetBuffer);
+      displayData(packetBuffer);
+      // lcd.setCursor(0, 0);
+      // lcd.print(packetBuffer);
     }
-    // if(!(n == 1 && packetBuffer[0] == '+')) {
-    //   Serial.println(packetBuffer);
-    //   lcd.setCursor(0, 0);
-    //   lcd.print(packetBuffer);
-    //   if(packetSize > 10) {
-    //     lcd.setCursor(0, 1); // x, y
-    //     lcd.print(packetBuffer.substring(11, 11));
-    //   }
-    // }
   }
 }
