@@ -17,7 +17,7 @@ using namespace std;
 #include <WiFiCredentials.h>
 
 #define voltageReadPin A0
-#define TIMEOUT 1500
+#define TIMEOUT 1000
 
 // #define ASCII_SPACE 32 // ASCII 32 is a space
 
@@ -32,13 +32,13 @@ const char* hostname = "wemi-a";
 const char* destination_IP = "192.168.1.3";
 unsigned int localPort = 8888;
 
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
-// char ReplyBuffer[] = "acknowledged\r\n";
+// const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
+const int MAX_MESSAGE_SIZE = 40;
+
+// char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
+char packetBuffer[41]; // limit it so that it fits on the top 2 lines of the display (2 * 20 = 40), add one for the null character at the end (40 + 1 = 41)
 
 WiFiUDP Udp;
-
-const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
-// const int MAX_MESSAGE_SIZE = 10; // for testing purposes
 
 bool colFlags[] = {false, false, false, false};
 const int columnPins[] = {16, 4, 12, 5}; // actual pins

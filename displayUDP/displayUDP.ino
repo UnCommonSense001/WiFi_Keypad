@@ -25,14 +25,15 @@ const char* hostname = "wemi-b";
 const char* destination_IP = "192.168.1.2";
 unsigned int localPort = 8888;
 
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
+// const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
+const int MAX_MESSAGE_SIZE = 40;
+
+// char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
+char packetBuffer[41]; // limit it so that it fits on the top 2 lines of the display (2 * 20 = 40), add one for the null character at the end (40 + 1 = 41)
 
 WiFiUDP Udp;
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-// const int MAX_MESSAGE_SIZE = UDP_TX_PACKET_MAX_SIZE;
-
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 void setup() {
   Serial.begin(115200);
 
@@ -68,13 +69,22 @@ void loop() {
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     // read the packet into packetBufffer
-    int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+    int n = Udp.read(packetBuffer, MAX_MESSAGE_SIZE + 1);
     packetBuffer[n] = 0;
     lcd.clear();
     if(!(n == 1 && packetBuffer[0] == '+')) {
       Serial.println(packetBuffer);
-      lcd.setCursor(0, 0);  
+      lcd.setCursor(0, 0);
       lcd.print(packetBuffer);
     }
+    // if(!(n == 1 && packetBuffer[0] == '+')) {
+    //   Serial.println(packetBuffer);
+    //   lcd.setCursor(0, 0);
+    //   lcd.print(packetBuffer);
+    //   if(packetSize > 10) {
+    //     lcd.setCursor(0, 1); // x, y
+    //     lcd.print(packetBuffer.substring(11, 11));
+    //   }
+    // }
   }
 }
