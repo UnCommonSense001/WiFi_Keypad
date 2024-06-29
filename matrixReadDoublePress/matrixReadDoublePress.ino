@@ -1,8 +1,8 @@
 /* PINOUT
 looking at my button matrix with pins on the left
-D1
+D7
 D6
-D2
+D5
 D0
 Then rest of pins to breadboard (for voltage ladder)
 */
@@ -39,7 +39,7 @@ char packetBuffer[41]; // limit it so that it fits on the top 2 lines of the dis
 WiFiUDP Udp;
 
 bool colFlags[] = {false, false, false, false};
-const int columnPins[] = {D0, D2, D6, D1};
+const int columnPins[] = {D0, D5, D6, D7};
 
 const int baseNum = 65; // ASCII "A"
 const int maxNum = 90; // ASCII "Z"
