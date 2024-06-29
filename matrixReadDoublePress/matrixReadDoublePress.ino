@@ -19,8 +19,6 @@ using namespace std;
 #define voltageReadPin A0
 #define TIMEOUT 1000
 
-// #define ASCII_SPACE 32 // ASCII 32 is a space
-
 const char* ssid = SSID;
 const char* password = PSK;
 
@@ -41,8 +39,7 @@ char packetBuffer[41]; // limit it so that it fits on the top 2 lines of the dis
 WiFiUDP Udp;
 
 bool colFlags[] = {false, false, false, false};
-const int columnPins[] = {16, 4, 12, 5}; // actual pins
-// int columnPins[] = {D0, D2, D6, D1}; // attempt at converting (NOT TESTED)
+const int columnPins[] = {D0, D2, D6, D1};
 
 const int baseNum = 65; // ASCII "A"
 const int maxNum = 90; // ASCII "Z"
@@ -124,48 +121,29 @@ void readMatrix(button_t &lButton) {
       button_t curButton;
       char unshiftedChar = baseNum + (row * 8) + (col * 2);
       char shiftedChar = unshiftedChar + 1;
-      // if(unshiftedChar == 93) {
-      //   unshiftedChar == ' ';
-      //   Serial.println("SPACE!!!!");
-      // }
       setButton(curButton, col, row, curTime, unshiftedChar);
 
-      // Serial.println((int)unshiftedChar);
-
       if(msgToSend.size() < MAX_MESSAGE_SIZE) {
-        // if(curButton.character == 93) {
-        //   // Serial.println(" ");
-        //   msgToSend = msgToSend + ' ';
-        //   clearButton(curButton);
-        // }
         if(compareButtons(lButton, curButton) && isValid(curButton) && curButton.time - lButton.time <= TIMEOUT) {
           char newChar = lButton.character + 1;
-          // Serial.println(newChar);
           msgToSend = msgToSend + newChar;
           clearButton(lButton);
         } else if(isValid(lButton) && isValid(curButton)) {
-          // Serial.println(lButton.character);
           msgToSend = msgToSend + lButton.character;
           setButton(lButton, curButton);
-        // } else if(isValid(lButton) && !isValid(curButton)) {
         } else if(isValid(lButton) && (!isValid(curButton) || curButton.character == 93)) {
-          // Serial.println(lButton.character);
           msgToSend = msgToSend + lButton.character;
-          // if(curButton.character == 93) {
-          //   msgToSend += ' ';
-          // }
           clearButton(lButton);
         } else {
           setButton(lButton, curButton);
         }
         if(curButton.character == 93) {
-        msgToSend += ' ';
+          msgToSend += ' ';
         }
       }
 
       if(!isValid(curButton)) {
         if(curButton.character == 95) {
-          // "SEND"
           clearButton(curButton);
           Serial.println("SENDING over WiFi (UDP!");
           if(msgToSend != "") {
@@ -176,12 +154,7 @@ void readMatrix(button_t &lButton) {
           delay(250);
           msgToSend = "";
         }
-        /*else if(curButton.character == 93) {
-          // PREVIOUSLY - "Clear"
-          // msgToSend = "";
-        }*/
         else if(curButton.character == 91) {
-          // "Backspace"
           if (!msgToSend.empty()) {
             msgToSend.pop_back();
           }
@@ -192,7 +165,6 @@ void readMatrix(button_t &lButton) {
     if (row == -1 && colFlags[col])
       colFlags[col] = false;
   }
-  // return '\0';
 }
 
 void setup() {
@@ -222,9 +194,7 @@ void loop() {
   readMatrix(lastButton);
   unsigned long curTime = millis();
   if(isValid(lastButton) && curTime - lastButton.time >= TIMEOUT) {
-    // Serial.println(lastButton.character);
     msgToSend = msgToSend + lastButton.character;
-    // strcat(msgToSend, &lastButton.character); // known working alone
     clearButton(lastButton);
   }
   Serial.println(msgToSend.c_str());
